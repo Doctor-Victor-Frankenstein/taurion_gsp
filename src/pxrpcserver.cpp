@@ -87,8 +87,7 @@ CheckIntBounds (const std::string& name, const int value,
 void
 PXRpcServer::stop ()
 {
-  LOG (INFO) << "RPC method called: stop";
-  game.RequestStop ();
+  LOG (WARNING) << "Ignoring stop RPC";
 }
 
 Json::Value
@@ -186,7 +185,7 @@ PXRpcServer::getprizestats ()
 }
 
 Json::Value
-PXRpcServer::findpath (const int l1range, const Json::Value& source,
+PXRpcServer::findpath (int l1range, const Json::Value& source,
                        const Json::Value& target, const int wpdist)
 {
   LOG (INFO)
@@ -194,6 +193,15 @@ PXRpcServer::findpath (const int l1range, const Json::Value& source,
       << "  l1range=" << l1range << ", wpdist=" << wpdist << ",\n"
       << "  source=" << source << ",\n"
       << "  target=" << target;
+
+  constexpr int maxL1Range = 8'192;
+  if (l1range > maxL1Range)
+    {
+      LOG (WARNING)
+          << "Using maximum L1 range " << maxL1Range
+          << " instead of " << l1range;
+      l1range = maxL1Range;
+    }
 
   HexCoord sourceCoord;
   if (!CoordFromJson (source, sourceCoord))
